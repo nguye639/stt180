@@ -1,0 +1,200 @@
+---
+title: "Flying with dplyr"
+author: ""
+date: "M2A4 Week2"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: false
+    df_print: paged
+---
+
+<style type="text/css">
+
+/* Title */
+h1.title {
+  color: #6D1DD3;
+}
+
+/* Header 1 */
+h1 {
+  color: #6D1DD3;
+}
+
+/* Header 2 */
+h2 {
+  color: Salmon;
+}
+</style>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      message = FALSE, 
+                      warning = FALSE,
+                      comment = NA)
+```
+
+# Introduction
+
+We will work with the data frame `flights`, which is included in the 
+`nycflights13` package. To get started load `tidyverse` and `nycflights13`
+with
+
+```{r packages}
+library(tidyverse)
+library(nycflights13)
+```
+
+You may need to install `nycflights13`. Run `install.packages("nycflights13")`
+in your RStudio Console pane.
+
+Package `nycflights13` contains a data frame `flights` that has 
+on-time data for all flights that departed NYC (i.e. JFK, LGA or EWR) in 2013.
+Take a few minutes to examine the variables and their descriptions with regards
+to `flights`. Run `?flights` in your RStudio Console pane.
+
+```{r view}
+flights
+```
+
+Object `flights` is a tibble. Another way to view the tibble in order to see
+all variables is with function `glimpse()`.
+
+```{r glimpse}
+glimpse(flights)
+```
+
+## Comparison operators
+
+Before you get started, take a few minutes to refresh on some of R's
+comparison operators detailed below.
+
+Operator | Description
+---------|-------------
+`>`  | greater than
+`<`  | less than
+`>=` | greater than or equal to
+`<=` | less than or equal to
+`==` | equal to 
+`!=` | not equal to
+`&`  | and (ex: `(5 > 7) & (6*7 == 42)` will return the value FALSE)
+`|`  | or  (ex: `(5 > 7) | (6*7 == 42)` will return the value TRUE)
+`%in%` | group membership
+
+To evaluate group membership:
+
+```{r group-member, eval = F}
+# Generating the group:
+set.seed(634789234)
+die.out <- sample(x = 1:6, size = 10, replace = T)
+die.out
+
+#Checking for group membership:
+die.out %in% c(3, 4)
+c(3, 4) %in% die.out
+
+die.out %in% c(1)
+c(1) %in% die.out
+```
+
+# dplyr
+
+Package dplyr is based on the concept of functions as verbs that 
+manipulate data frames.
+
+Function | Action and purpose
+---------|-------------------------------
+`filter()` | choose rows matching a set of criteria
+`slice()` | choose rows using indices
+`select()` | choose columns by name
+`pull()` | grab a column as a vector
+`rename()` | rename specific columns
+`arrange()` | reorder rows
+`mutate()` | add new variables to the data frame
+`transmute()` | create a new data frame with new variables
+`distinct()` | filter for unique rows
+`sample_n / sample_frac()` | randomly sample rows
+`summarise()` | reduce variables to values
+
+## Exercise set 1
+
+Make use of `%>%` operator and any of the functions in package `dplyr` to 
+answer the following questions.
+
+1. Filter `flights` for those in January with a destination of
+   Detroit Metro (DTW) or Chicago O'Hare (ORD).
+```{r 1.1}
+flights %>% filter(dest == 'DTW' | dest == 'ORD' & month == 1)
+   
+```
+   
+2. Filter `flights` for those before April with a destination that is not
+   Detroit Metro (DTW) and had an origin of JFK.
+```{r 1.2}
+flights %>% filter(dest != 'DTW' & month <= 4 & origin == 'JFK')
+
+```
+
+3. Choose rows 1, 3, 7, 20 from `flights`.
+```{r 1.3}
+flights %>% slice(c(1,3,7,20))
+```
+
+4. Arrange flights by distance and then by departure delay, with the 
+   sorting being in descending order in both cases. *Hint:* `desc()`
+```{r 4}
+flights %>% arrange(desc(flights$distance))
+flights %>% arrange(desc(flights$dep_delay))
+
+```
+   
+5. Select only columns month, origin, and destination from `flights`.
+```{r 5}
+flights %>% select('month','origin', 'dest')
+```
+
+6. Add a new variable to `flights` called `gain`, where `gain` is the
+   arrival delay minus the departure delay.
+```{r 6}
+gain = flights$arr_delay - flights$dep_delay
+cbind(flights, gain)
+```
+
+   
+7. Use summarise to obtain the mean departure delay and mean arrival delay for all flights with an origin of EWR.
+```{r 7}
+flights_EWR = subset(flights, origin == 'EWR')
+flights_EWR
+flights_EWR %>% summarise(dep_delay)
+flights_EWR %>% summarise(arr_delay)
+
+```
+
+   
+## Exercise set 2
+
+Grouping adds substantially to the power of the `dplyr` functions. We will 
+focus on using `summarise()` with `group_by()`, but grouping also can be 
+used with other `dplyr` functions.
+
+1. Create a data frame which contains the number of flights and the mean arrival delay for flights on carrier UA (United Airlines) whose destination is O'Hare Airport (ORD). The number of flights and mean arrival delay is calculated separately for flights out of each of the origin airports.
+```{r 2.1}
+flights_sorted = subset(flights, dest == 'ORD' & carrier == 'UA')
+flights_sorted
+
+length(flights_sorted$arr_delay)
+mean(flights_sorted$arr_delay)
+```
+```{r}
+
+```
+   
+
+
+# References
+
+1. https://cran.r-project.org/web/packages/dplyr/vignettes/introduction.html
+
+

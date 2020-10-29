@@ -1,0 +1,289 @@
+---
+title: "Summer B STT 180 Homework 3"
+author: "Le Nguyen"
+date: "August 3, 2020"
+output: 
+  html_document:
+    toc: true
+    number_sections: false
+    toc_float: true
+    toc_depth: 4
+    df_print: paged
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      message = FALSE, 
+                      warning = FALSE,
+                      comment = NA)
+```
+
+**Setting up:**
+
+Load `tidyverse` (which includes `dplyr`, `ggplot2`, `tidyr`, and other packages), `knitr` and `broom` packages.
+
+```{r echo=TRUE}
+library(tidyverse)
+library(knitr)
+library(broom)
+library(infer)
+```
+
+
+This Homework is due on **Monday, August 10, 2020 on or before 11 pm.**
+
+# Section 1
+
+For the first section of this homework will use the`Breast_Cancer.csv` file. There are 10 quantitative variables, and a binary dependent variable, indicating the presence or absence of breast cancer. The predictors are anthropometric data and parameters which can be gathered in routine blood analysis. 
+
+Read in the data and convert the data frame to a tibble.
+
+```{r echo=TRUE}
+birth_data <- read.csv("Breast_Cancer.csv", header = TRUE)
+birth_data <- as_tibble(birth_data)
+```
+
+A glimpse of the data:
+
+```{r }
+glimpse(birth_data)
+```
+
+The variables in the data set are:
+
+Variable | Description
+---------|------------
+`Age` | age in years.
+`BMI` | the body mass index.
+`Glucose (mg/dL)` | the fasting glucose level (mg/dL).
+`Insulin (µg/mL)` | amount of insulin.
+`HOMA` | Homeostasis Model Assessment.
+`Leptin (ng/mL) ` | type of adipocytokines    
+`Adiponectin (µg/mL) ` | a protein hormone. 
+`Resistin (ng/mL)` | cysteine-rich peptide hormone.
+`MCP-1(pg/dL)` | Monocyte chemoattractant protein-1 (MCP-1)
+`Classification` | 1= Healty control, 2= Breast Cancer Patients.
+
+
+Make sure to familiarize yourself with the data by reading about the variables on the website. Note that the data comes the study https://bmccancer.biomedcentral.com/articles/10.1186/s12885-017-3877-1. 
+
+According to CDC, (https://www.cdc.gov/healthyweight/assessing/bmi/adult_bmi/index.html)  BMI between 18-25 is considered normal. 
+
+Let us investigate using the Breast_Cancer data, whether breast cancer patients have normal BMI on average (considering 25 as normal)?
+
+### Question 1
+
+Calculate sample statistic. Is it a continuous or categorical sample statistic?
+
+```{r}
+summary(birth_data$BMI)
+hist(birth_data$BMI, xlab = "BMI", Main = "BMI Distribustion")
+mean(birth_data$BMI)
+
+```
+Since we are looking at BMI, this is a continuous sample statistic since it's over a range of values. The mean and median values are close together, but I am choosing the mean value as my sample statistic since we want to compare to the average BMI. 
+ 
+### Question 2
+
+Set up and test hypotheses to determine whether breast cancer patients have higher than normal BMI or not (follow the hypothesis process stepwise as you have done in your Module 5 group assignments) .
+
+Null hypothesis: Breast cancer has no relation to BMI, so breast cancer patients' BMI will simply tend towards a normal BMI and not have higher than normal.
+
+Alternative hypothesis: Breast cancer patients will have higher than normal BMI. 
+
+```{r}
+#Create a null distribution by boot strapping
+null.dist <- birth_data %>%
+  specify(response = BMI) %>%
+  hypothesize(null = "point", mu = 25) %>%
+  generate(reps = 10000, type = "bootstrap") %>%
+  calculate(stat = "mean")
+hist(null.dist$stat, xlab = "Mean BMI", main = "Null distribution")
+
+#calculate the P value
+z =(mean(null.dist$stat) - 25)/(sd(null.dist$stat)/sqrt(length(null.dist$stat)))
+p = 2*pnorm(-abs(z))
+print(p)
+```
+
+
+
+### QUestion 3
+
+Estimate 95% confidence interval for average BMI of breast cancer patients.
+
+
+```{r}
+boot.means <- birth_data %>%
+  specify(response = BMI) %>%
+  generate(reps = 10000, type = "bootstrap") %>%
+  calculate(stat = "mean")
+
+hist(boot.means$stat, xlab = "Mean BMI", main = "Bootsrap distribution")
+
+boot.means %>%
+  summarise(lower95 = quantile(stat, probs = .025),
+            upper95 = quantile(stat, probs = .975))
+```
+
+
+### Question 4
+
+Is having a higher than normal BMI, an indicator of increase risk of breast cancer given your results in 2 and 3? (Hint: consider the BMI of people don’t have breast cancer.) Justify your answer in 3-4 sentences.
+
+I do not think we can conclude BMI is an indicator of breast cancer. Though we are 95% sure the average BMI of people with breast cancer is higher than normal, we were unable to disprove the null hypothesis. This is because the number of people with breast cancer at or below normal BMI is too significant.  
+
+# Section 2
+
+For this section of this homework will use the`abalone.csv` file from UCI repository (https://archive.ics.uci.edu/ml/datasets/Abalone).
+
+The number of rings in the shell of a abalone is indicative of its age. This is done by cutting the shell through the cone, staining it, and counting the number of rings through a microscope -- a boring and time-consuming task. In this section, we will analyze the relationship between age (measured by the number of rings) and a few different variables present in the data.
+
+
+
+```{r read data}
+ab <- read.csv("abalone.csv")
+Age = ab$Rings + 1.5
+ab = cbind(ab,Age)
+glimpse(ab)
+```
+
+### Question 1
+
+We will start with analyzing a simple bivariate relationship between age and height. 
+
+Plot a scatter plot to get an idea about the relationship between height and age. Comment (1-3 sentences) on the plot.
+
+```{r}
+
+
+ggplot(ab, aes(x = Age, y = Height)) + geom_point()
+
+
+```
+There is a positive correlation with rings and height, but it looks like height increases to some level around 12 years and level off from there. 
+
+### Question 2
+
+Modify the plot in Question 1 to reflect the effect of the variable `Sex` in the plot.
+
+```{r}
+ggplot(ab, aes(x = Sex, y = Height)) + geom_point()
+
+```
+
+### Question 3
+
+One of the goal is to study if there is significant difference in the age of the abalone based on shell weight, height, and diameter?  Fit a multiple regression model to test the effect of the three variables on the age of the abalone.
+
+```{r}
+mod.fit <- lm(Age~ Shell + Height + Diameter, data = ab)
+mod.fit %>%
+  broom::tidy()
+mod.fit %>%
+  glance(r.squared) 
+```
+
+
+### Question 4
+
+Can the model in Question 3 be improved to make it more parsimonious? Does it significantly change the model fit parameters?
+
+```{r}
+mod.fit <- lm(Age~ Height, data = ab)
+mod.fit %>%
+  broom::tidy()
+mod.fit %>%
+  glance(r.squared) 
+
+```
+Yes, the R^2 can be decreased with a parsimonious model that only fits Height to the age.  
+
+### Question 5
+
+How about the variable `Sex`? Does it have any significant impact on predicting the `Age` if included in the model from Question 4?
+
+```{r}
+ab$Sex = factor(ab$Sex)
+ab$Sex= relevel(ab$Sex, "I")
+
+mod.fit <- lm(Age~ Height + Sex, data = ab)
+mod.fit %>%
+  broom::tidy()
+mod.fit %>%
+  glance(r.squared) 
+
+```
+Adding sex of the tree increases the R^2 value, making it slightly less accurate.
+
+### Question 6	
+
+Interpret the results from the model in Question 5. WHat does each coefficeint signify?
+
+</b></b>
+
+The first coefficient is the intercept which is not significant in this fit because it's at age 0, which is meaningless in this context. The second is the height, and strongly positively correlates with age as we saw before. for every 1 mm in height, 34.7 years pass. The next two coefficients are for the sex of the tree. I revel to infant because I thought that was an unfair comparison with overall age. For both Male and Female, there is a small positive correlation with age, with females being more positively correlated. This means females trees tend to be older.    
+
+
+
+
+
+
+# Essential details {.tabset .tabset-fade .tabset-pills}
+
+### Deadline and submission
+
+The deadline to submit Homework 3 is **11:00pm on Monday, 10 August, 2020.** 
+
+Submit your work by uploading your Rmd and html file through D2L. Please check your html file before submitting. Late work will not be accepted except under certain extraordinary circumstances.
+
+
+### Help
+
+- Post general questions in the HW3 Teams channel. If you are trying to get help on a code error, explain your error in detail
+
+- Feel free to visit us during our virtual zoom office hours, or make an appointment.
+
+- Communicate with your classmates, but do not share snippets of code.
+
+- The instructional team will not answer any questions within the first 24 hours of this homework being assigned, and we will not answer any questions after 6 P.M of the due date.
+
+### Academic integrity
+
+This is an individual assignment. You may discuss ideas, how to debug code, or how to approach a problem with your classmates.You may also post your general questions in the HW3 channel in Teams.But you may not copy-and-paste another individual's code from this class. As a reminder, below is the policy on sharing and using other's code.
+
+>Similar reproducible examples (reprex) exist online that will help you answer 
+many of the questions posed on in-class assignments, pre-class assignments, 
+homework assignments, and midterm exams. Use of these resources is allowed 
+unless it is written explicitly on the assignment. You must always cite any 
+code you copy or use as inspiration. Copied code without citation is 
+plagiarism and will result in a 0 for the assignment.
+
+
+### Grading
+
+Use the R Markdown blank file that is provided. If you want you can use your own formatting. Self-formatting is at your discretion but is graded. Use the
+in-class assignments and resources available online for inspiration. Another 
+useful resource for R Markdown formatting is
+available at: https://holtzy.github.io/Pimp-my-rmd/
+
+**Topic**|**Points**
+---------|----------:|
+Questions(total 10) | 80 
+R Markdown formatting and knitting | 5
+Communication of results| 10
+Code style| 5
+**Total**|**100**
+
+
+
+# Reference
+
+https://bmccancer.biomedcentral.com/articles/10.1186/s12885-017-3877-1. 
+
+https://archive.ics.uci.edu/ml/datasets/Breast+Cancer+Coimbra
+
+https://www.cdc.gov/healthyweight/assessing/bmi/adult_bmi/index.html
+
+https://archive.ics.uci.edu/ml/datasets/Abalone

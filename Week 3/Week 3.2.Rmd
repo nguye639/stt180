@@ -1,0 +1,95 @@
+---
+title: "Week 3.2"
+author: "Le Nguyen"
+date: "7/15/2020"
+output: html_document
+---
+
+```{r 1.1}
+library(tidyverse)
+
+options(digits = 3)
+fiveUnivariate <- readRDS(url("https://raw.githubusercontent.com/vfmelfi/STT180SS20/master/fiveUnivariate.rds"))
+str(fiveUnivariate)
+
+names(fiveUnivariate)
+
+unique(fiveUnivariate$dataSet)
+
+head(fiveUnivariate$observation[fiveUnivariate$dataSet == "normal"])
+
+```
+```{r 1.1.1}
+ggplot(fiveUnivariate, aes(x = dataSet, y = observation)) + geom_boxplot()
+
+#1.1.2
+#The data sets seem identical in a box plot, but this just means the data in each set is distributed uniformly in each quartile around the same mean. 
+
+```
+```{r 1.1.3}
+ggplot(fiveUnivariate, aes(x = dataSet, y = observation)) + geom_violin()
+
+#A violin plot sheds more light onto the data. We can now see the data sets are not uniformly distributed like the box plot would suggest. The data sets have the same mean, but the distribution of observations is different for each set. 
+
+```
+```{r 1.1.4}
+with(fiveUnivariate, tapply(observation, dataSet, summary))
+```
+```{r 1.2}
+fourBivariate <- readRDS(url("https://raw.githubusercontent.com/vfmelfi/STT180SS20/master/fourBivariate.rds"))
+str(fourBivariate)
+
+unique(fourBivariate$dataSet)
+
+```
+```{r 1.2.5}
+with(fourBivariate[fourBivariate$dataSet == 'away',], tapply(x, dataSet, mean))
+with(fourBivariate[fourBivariate$dataSet == 'circle',], tapply(x, dataSet, mean))
+with(fourBivariate[fourBivariate$dataSet == 'dino',],tapply(x,dataSet, mean))
+with(fourBivariate[fourBivariate$dataSet == 'star',], tapply(x,dataSet, mean))
+#The means of the data sets are identical. 
+
+```
+```{r 1.2.6}
+with(fourBivariate[fourBivariate$dataSet == 'away',], tapply(y, dataSet, mean))
+with(fourBivariate[fourBivariate$dataSet == 'circle',], tapply(y, dataSet, mean))
+with(fourBivariate[fourBivariate$dataSet == 'dino',],tapply(y,dataSet, mean))
+with(fourBivariate[fourBivariate$dataSet == 'star',], tapply(y,dataSet, mean))
+#The means of the data sets are identical. 
+
+```
+```{r 1.2.7}
+with(fourBivariate[fourBivariate$dataSet == 'away',], tapply(x, dataSet, sd))
+with(fourBivariate[fourBivariate$dataSet == 'circle',], tapply(x, dataSet, sd ))
+with(fourBivariate[fourBivariate$dataSet == 'dino',],tapply(x,dataSet, sd))
+with(fourBivariate[fourBivariate$dataSet == 'star',], tapply(x,dataSet, sd))
+#The standard deviations of the data sets are identical. 
+
+```
+```{r 1.2.8}
+with(fourBivariate[fourBivariate$dataSet == 'away',], tapply(y, dataSet, sd))
+with(fourBivariate[fourBivariate$dataSet == 'circle',], tapply(y, dataSet, sd ))
+with(fourBivariate[fourBivariate$dataSet == 'dino',],tapply(y,dataSet, sd))
+with(fourBivariate[fourBivariate$dataSet == 'star',], tapply(y,dataSet, sd))
+
+#The standard deviations of the data sets are identical. 
+
+```
+```{r 1.2.9}
+with(fourBivariate[fourBivariate$dataSet == 'away',], cor(x, y))
+with(fourBivariate[fourBivariate$dataSet == 'circle',], cor(x, y))
+with(fourBivariate[fourBivariate$dataSet == 'dino',], cor(x, y))
+with(fourBivariate[fourBivariate$dataSet == 'star',], cor(x, y))
+
+#The correlation coefficients are similar,
+```
+```{r 1.2.10}
+
+graph = ggplot(fourBivariate, aes(x=x, y=y)) + geom_point()
+graph + facet_wrap(~dataSet, ncol =2)
+
+#The plots show that those quantities are not really meaningful since the data is artistic. I don't really see how the shapes show why the statistics are the same though, I would think they would be vastly different given how the points are distributive in each data set.  
+
+
+```
+

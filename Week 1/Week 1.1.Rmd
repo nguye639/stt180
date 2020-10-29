@@ -1,0 +1,141 @@
+---
+title: ""
+author: "Group 6"
+date: "7/3/2020"
+output: html_document
+---
+
+```{r 2}
+3 + 4 * 0 - (100 / 3)
+(4 + 6) * (2 ^ 6)
+1 / 0
+10 ^ 10 ^ 10 ^ 10
+0 / 0
+0.0000003 * 2
+
+abs(7)
+sin(3.1415)
+exp(1)
+
+# log base e
+log(1)
+log(6)
+log(10)
+
+#log base 10
+log10(1)
+log10(6)
+log10(10)
+
+#log base 2
+log2(1)
+log2(6)
+log2(10)
+
+print("the default logirithm is natural log")
+
+print("mtcars is a data set for motor trend car road tests ")
+print("longley is Longley's Economic Regression Data")
+print("I can only see one example of standard deviation given")
+
+sd(1:2) ^ 2
+
+print("sqrt takes the square root")
+print("round, rounds a number to the nearest integer")
+round(0.6)
+print("floor rounds down to an integer")
+print("ceiling rounds up to an integer")
+```
+
+```{r 3.1}
+longley
+
+nrow(longley)
+ncol(longley)
+
+print("The first column is the row index which happens to be the year,
+      while the year column is actually stating the year")
+head(longley)
+tail(longley)
+
+print("head gives the first few rows of the data set while tails gives the last few")
+
+```
+```{r 3.2}
+longley$GNP ->g
+print("GNP")
+g
+longley$Year -> y
+print("Year")
+y
+longley$Unemployed ->u
+print("Unemployed")
+u
+longley$Population ->p
+print("Population")
+p
+longley$Employed -> e
+print("Employed")
+e
+
+print('Unemployed')
+cat("mean: ", mean(u),"\n")
+cat("median: ", median(u),"\n")
+cat("std: ", sd(u), "\n")
+cat("max: ", max(u), "\n")
+cat("min: ", min(u), "\n")
+
+print('Population')
+cat("mean: ", mean(p),"\n")
+cat("median: ", median(p),"\n")
+cat("std: ", sd(p), "\n")
+cat("max: ", max(p), "\n")
+cat("min: ", min(p), "\n")
+
+print('Employed')
+cat("mean: ", mean(e),"\n")
+cat("median: ", median(e),"\n")
+cat("std: ", sd(e))
+cat("max: ", max(e), "\n")
+cat("min: ", min(e), "\n")
+
+print("Summary GNP")
+summary(longley$GNP)
+print("Employed")
+summary(longley$Employed)
+print("Unemployed")
+summary(longley$Unemployed)
+
+print("Getting a summary of year would not be meaningful since the time is an independent variable. There's no reason to have statitics on it because it doesn't changed based on anything we do")
+```
+
+```{r 3.3}
+longley$Population ->p
+longley$Employed -> e
+longley$Unemployed -> u
+
+print("Looking at the raw number of employed people is not the best representation because that number will grown naturally as population grows. A better view of the data is looking at what percentage of people are employed rather than the raw number since it accounts of changes in population. With this view, we can see economist B is correct becuase the percentage of people who are employed is at its lowest in 1962.")
+
+plot(x = longley$Year, y = e/p, xlab = "Year", ylab = "Percentage of Population Employed", main = "Percent of People Employed Over Time")
+
+plot(x = longley$Year, y = longley$Employed, xlab = "Year", ylab = "Employed")
+
+```
+```{r echo=FALSE}
+
+library(ggplot2)
+library(rvg)
+library(ggiraph)
+
+longley$tooltip <- paste("GNP: ", longley$GNP, sep = "")
+
+gg_point_1 <- ggplot(longley, 
+                     aes(x = Year, y = Employed, tooltip = tooltip)) + 
+              geom_point_interactive(size = 4, color = "darkblue") + 
+              theme_bw()
+
+ggiraph(ggobj = gg_point_1)
+```
+
+
+

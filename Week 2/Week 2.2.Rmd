@@ -1,0 +1,142 @@
+---
+title: "Week 2.2"
+author: "Le Nguyen"
+date: "7/7/2020"
+output: html_document
+---
+
+```{r 1}
+library("gapminder")
+gapminder <- system.file("extdata", "gapminder.tsv", package = "gapminder")
+gapminder <- read.delim(gapminder)
+ls(gapminder)
+
+head(gapminder)
+```
+```{r 2.1}
+str(gapminder)
+gapminder[3,]
+```
+```{r 2.2}
+
+head(gapminder$year, n = 50)
+
+```
+
+```{r 2.3}
+
+unique(gapminder$year)
+
+```
+```{r 2.4}
+gapminder1952 <- subset(gapminder, year == 1952)
+str(gapminder1952)
+
+gapminder2002 <- subset(gapminder, year == 2002)
+str(gapminder2002)
+
+```
+```{r 2.5}
+life_exp = as.numeric(gapminder2002$lifeExp) 
+contient = gapminder2002$continent
+
+boxplot(life_exp~contient)
+```
+```{r 2.6}
+#It looks like Oceania has the largest mean life expectancy with Africa having the largest ranges of life expectancy.
+```
+```{r 2.7}
+summary(gapminder1952$lifeExp)
+summary(gapminder1952$gdpPercap)
+summary(gapminder2002$lifeExp)
+summary(gapminder2002$gdpPercap)
+
+#We should not compare GDP across this time period because it isn't adjusted for inflation 
+```
+```{r 2.8}
+Vietnam = subset(gapminder, country == 'Vietnam')
+plot(Vietnam$year, Vietnam$lifeExp, xlab = 'year', ylab = 'Life Expectancy',
+     pch = 15, col = "red")
+plot(Vietnam$year, Vietnam$gdpPercap, type = 'l',xlab = 'year', ylab = 'GDP')
+```
+```{r 2.9}
+
+Vietnam_1952 <- subset(Vietnam, year == 1952)
+Vietnam_2002 <- subset(Vietnam, year == 2002)
+
+median(Vietnam_1952$lifeExp)
+median(Vietnam_2002$lifeExp)
+
+#The median life expectancy dramatically increased over the decades.
+
+```
+```{r 2.10}
+
+median(Vietnam_1952$gdpPercap)
+median(Vietnam_2002$gdpPercap)
+mean(Vietnam_1952$gdpPercap)
+mean(Vietnam_2002$gdpPercap)
+
+#The median and mean dramatically increased over the decades as well.
+
+```
+```{r 2.11}
+
+
+Angola = subset(gapminder, country == 'Angola')
+plot(Angola$year, Angola$lifeExp, xlab = 'year', ylab = 'Life Expectancy',)
+plot(Angola$year, Angola$gdpPercap,xlab = 'year', ylab = 'GDP')
+```
+```{r 3}
+mean(gapminder$pop[gapminder$country == "France"])
+unique(gapminder$country[gapminder$continent == "Africa"])
+gapminder$country[(gapminder$pop > 150000000) & (gapminder$year == 1992)]
+x <- 5:10
+y <- c(3, 5, 6, 9, 12, 15)
+
+x %in% y
+y %in% x
+
+dd <-  data.frame(x = c("dog", "cat", "oink", "pig", "oink", "cat", "dog"), 
+                y = c("dog", "cat", "cat", "pig", "cow", "dog", "dog"),
+                stringsAsFactors = FALSE)
+dd
+
+dd$x[dd$x == "oink"] <- "pig"
+dd
+
+dd$same <- rep("no", dim(dd)[1])
+dd
+
+dd$same[dd$x == dd$y] <- "yes"
+dd
+
+
+```
+```{r 3.1.1}
+gapminder_1967 <- subset(gapminder, year == 1967)
+gapminder_1967$country[gapminder_1967$lifeExp >70]
+```
+```{r 3.1.2}
+gapminder_2007 <- subset(gapminder, year == 2007)
+length(gapminder_2007$country[gapminder_2007$lifeExp >= 75])
+```
+
+
+
+```{r 3.1.3}
+G8 = c("France", "Germany", "Italy", "United Kingdom", "Japan", "United States", "Canada", "Russia")
+
+mask = as.numeric(gapminder$country %in% G8)
+gapminder = cbind(gapminder, mask)
+gapminder
+
+
+```
+```{r 3.1.4}
+G8_countries = subset(gapminder, mask == 1)
+par(las = 2)
+boxplot(G8_countries$gdpPercap~G8_countries$country, pin = (7))
+
+  
+```

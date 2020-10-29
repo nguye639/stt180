@@ -1,0 +1,228 @@
+---
+title: "Inference problems"
+author: " "
+date: "Module 5 A2 Week 5"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: false
+    df_print: paged
+---
+
+<style type="text/css">
+/* Title */
+h1.title {
+  color: #3A2C29;
+  font-size:60px;
+  font-weight: bold;
+}
+/* Level 1 header */
+h1 {
+  color: #3A2C29;
+}
+/* Level 2 header */
+h2 {
+  color: #C9C675;
+}
+/* Table of contents */
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+    z-index: 2;
+    color: #fff;
+    background-color: #C9C675;
+    border-color: #337ab7;
+</style>
+
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      error = TRUE,
+                      message = FALSE, 
+                      warning = FALSE,
+                      comment = NA)
+set.seed(3122019)
+```
+
+# Introduction
+
+Quantities $\bar{x}$ and $\hat{p}$ are good point estimates for the population 
+mean and population proportion, respectively. They are used in estimation and 
+hypothesis testing. These point estimates vary 
+from one sample to another. We will use package `infer` to get a deeper understanding of bothsimulation-based and theoritical inference. To get started, load packages `tidyverse` and `infer`.
+
+```{r packages}
+library(tidyverse)
+library(infer)
+```
+
+Below is a basic custom theme. Feel free to try it out when you use `ggplot()`.
+Simply add it as layer to your plot. Rather than using `theme_bw()` you can
+use `theme_custom()`. This custom theme increases the font point size on axes
+and their labels.
+
+```{r theme-custom}
+theme_custom <- function() {
+  theme_bw() +
+  theme(axis.title = element_text(size = 16), 
+        title = element_text(size = 20),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        plot.caption = element_text(size = 10))
+}
+```
+
+# Inference on population proportion
+
+The American Automobile Association claims that 54% of fatal car/truck
+accidents are caused by driver error. A researcher studies 35 randomly 
+selected accidents and finds that 14 were caused by driver error. Test the claim 
+at significance level of $\alpha$= 0.05.
+
+## Hypotheses
+
+State the null and alternative hypotheses given the problem above.
+
+Null: There is no association between fatal accidents and driver error
+
+Alternative: There is an association between fatal accidents and driver error
+
+## Simulation-based inference
+
+Below we create a data set to use with package `infer`. We will create
+a data frame `driver` that has "yes" or "no" outcomes with regards to the 
+question: Was the accident caused due to driver error?
+
+```{r shelter, echo=FALSE}
+# create data frame shelter
+driver <- as_tibble(rep(x = c("no", "yes"), times = c(21, 14)))
+
+# verify 53% are yes as per the survey results from above
+driver %>% 
+  group_by(value) %>% 
+  summarise(proportion = n() / nrow(driver))
+
+glimpse(driver)
+```
+
+### Simulated null distribution
+
+Simulate the null distribution using a sequence of functions from package
+`infer`. Follow the template in the notes, previous assignments, and take a look at the help for
+each function. Plot a histogram of the null distribution and place a 
+vertical line at the value of the observed sample proportion of 0.4.
+
+```{r null-dist}
+
+null = driver %>%
+  specify(response = value, success = 'no') %>%
+  hypothesise(null = "point", p= .4) %>%
+  generate(reps = 5, type = "bootstrap") %>%
+  mutate(value = ifelse(value == "no",0,1)) %>%
+  calculate(stat = 'mean')
+
+
+null
+
+
+
+      
+
+  
+```
+
+```{r null-plot}
+
+
+
+
+```
+
+### Compute the p-value
+
+Use the simulated null distribution to compute the p-value. Recall that the
+p-value is the probability of observing data at least as
+favorable to the alternative hypothesis as our current data set, given
+that the null hypothesis is true.
+
+```{r p-value}
+
+
+
+```
+
+### Conclusion from the hypothesis testing
+
+State your conclusion to "Does this provide convincing evidence that 54% of fatal car/truck
+accidents are caused by driver error", at the 5% 
+significance level? 
+
+Will your conclusion change if the testing was done at the 1% significance level?"
+
+
+### Explore the plausible values: Confidence interval
+
+Compute a 95% confidence interval for the proportion of all 
+accidents caused due to driver error.
+You may assume all the necessary assumptions are satisfied.
+
+```{r 95ConfidenceInterval}
+
+```
+
+Compare the 95% confidence interval with the 99% confidence interval.
+
+
+### Hypothesis testing and Confidence interval
+
+Does the confidence interval constructed in the previous example reflect the results obtained from the hypothesis testing? Justify your answer in 2-5 sentences.
+
+
+# Inference on population mean
+
+A certain chemical pollutant in the Genesee River has been constant for several years with mean μ = 34 ppm (parts per million) and standard deviation σ = 8 ppm.   A group of factory representatives whose companies discharge liquids into the river is now claiming that they have lowered the average with improved filtration devices. A group of environmentalists will test to see if this is true at the *4%* level of significance.   Assume that their sample of size 50 gives a mean of 32.5 ppm.  Perform a hypothesis test at the 4% level of significance and state your conclusion. 
+
+### Hypotheses
+
+State the null and alternative hypotheses given the problem above.
+
+
+
+
+### Simulated null distribution
+
+Plot a histogram of the simulated null distribution and place a 
+vertical line at the value of the observed sample mean.
+
+### Compute the p-value
+
+Use the simulated null distribution to compute the p-value. Recall that the
+p-value is the probability of observing data at least as
+favorable to the alternative hypothesis as the current data set, given
+that the null hypothesis is true.
+NOTE: For this section you will first have to generate the population and then randomly generate samples (maybe 1000) of size 50, calcualte the means and then plot the sampling distribution.
+
+### Conclusion from the hypothesis testing
+
+Perform a hypothesis test to determine if there  convincing evidence 
+to go with the factory representatives claim. Use a 4% significance level?
+
+Will your conclusion change if the testing was done at the 1% significance level?"
+
+
+### Explore the plausible values: Confidence interval
+
+### Confidence interval 
+
+Compute a 96% and 99% confidence interval for the average chemical pollutant in the Genesee River.
+You may assume all the necessary assumptions are satisfied.
+   
+
+
+
+# References
+
+1. https://cran.r-project.org/web/packages/infer/vignettes/flights_examples.html
+
+2. http://math.oxford.emory.edu/site/math117/probSetHypothesisTestsOneProportion2/

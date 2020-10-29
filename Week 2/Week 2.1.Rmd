@@ -1,0 +1,182 @@
+---
+title: "Week 2.1"
+author: "Le Nguyen"
+date: "7/7/2020"
+output: html_document
+---
+
+```{r 1}
+cereal <- read.csv("cereal.csv")
+attach(cereal)
+head(cereal)
+```
+```{r 2.1}
+protein_fat_ratio = cereal$protein/cereal$fat
+head(protein_fat_ratio)
+
+protein_carb_ratio = cereal$protein/cereal$carbo
+head(protein_carb_ratio)
+
+```
+```{r 2.3}
+#1
+#compare Bran to Bran Natural
+Bran = cereal[cereal$name == '100% Bran',]
+BranNat = cereal[cereal$name == '100% Natural Bran',]
+
+#does 100% Bran have more calories that 100% Bran natural
+Bran['calories'] > BranNat['calories']
+
+# does it have less sugar?
+Bran['sugars'] < BranNat['sugars']
+
+# >= carbs
+Bran['carbo'] >= BranNat['carbo']
+
+# <= protien
+Bran['protein'] >= BranNat['protein']
+
+# == fiber
+Bran['fiber'] == BranNat['fiber']
+
+# != fat
+Bran['fat'] != BranNat['fat']
+
+# > sodium & potassium
+Bran['sodium'] > BranNat['sodium'] & Bran['potass'] > BranNat['potass']
+
+# > carbs or sugar
+Bran['carbo'] > BranNat['carbo'] | Bran['sugars'] > BranNat['sugars']
+
+# 2
+# can use sum since True ==1 
+sum(cereal$calories > 100)
+
+#3
+sum(cereal$sugars == 0)
+
+```
+```{r 2.4}
+#guess
+#inf, inf, inf, inf, inf, inf, 0, nan, nan, nan, nan, nan
+
+#eval
+1/0
+0/0
+1/0 + 5
+1/0 - 1/0
+-2^(10000)
+exp(Inf)
+exp(-Inf)
+0^0
+Inf^0
+0^Inf
+log(0)
+log(-Inf)
+
+```
+```{r 3}
+0.2 == 0.6/3
+#because of machine precision, when dividing 0.6 by 3, it can't do it exactly making the numbers marginally different. 
+
+point3 = c(0.3, 0.4 - 0.1, 0.5 - 0.2, 0.6 - 0.3, 0.7 - 0.4)
+point3
+
+```
+```{r 4.1}
+
+schools = c('MSU', 'UM', 'OSU', 'PSU', 50085, 43625, 58322, 45518)
+schools
+
+```
+```{r 4.2}
+x <- letters[1:10]
+x
+x[5]
+x[c(1, 5, 9)]
+x[-c(4, 6, 10)]
+x[11]
+
+grades <- c(99, 85, 89, 92)
+names(grades) <- c("STT", "CMSE", "MTH", "STT")
+grades
+
+grades["STT"]
+grades["CMSE"]
+grades[4] <- 82
+grades[4]
+
+```
+```{r 4.4}
+# a
+stat.grade = c(78,87,65,98,95,99,70,85,75, 80)
+sum(stat.grade)
+mean(stat.grade)
+median(stat.grade)
+min(stat.grade)
+max(stat.grade)
+sd(stat.grade)
+var(stat.grade)
+length(stat.grade)
+sort(stat.grade)
+order(stat.grade)
+unique(stat.grade)
+summary(stat.grade)
+
+#b
+#sort gives the values of the vector in ascending order, while order gives the indexes of the values in ascending order
+
+
+x <- c(1, 4, -5, sqrt(3), exp(2))
+y <- c(T, F, T, T, F)
+x[y]
+# y was a vector of boolean values and any in index that matched a False value was masked out of the vector
+```
+
+```{r 4.4.d.1}
+length(cereal$name)
+```
+```{r 4.4.d.2}
+mean(cereal$sugar)
+```
+```{r 4.4.d.3}
+tail(sort(cereal$sugars), n =3)
+```
+
+```{r 4.4.d.4}
+head(sort(cereal$sugars), n =5)
+```
+
+```{r 4.4.d.5}
+tail(cereal$name[order(cereal$sugars)], n = 4)
+```
+```{r 4.4.d.6}
+sum(cereal$protein > 4 & cereal$sugars <3)
+```
+```{r 4.4.d.7}
+mean(cereal$sugars[cereal$shelf == 1])
+mean(cereal$sugars[cereal$shelf == 2])
+mean(cereal$sugars[cereal$shelf == 3])
+```
+```{r 4.4.d.8}
+shelf = cereal$shelf
+sugar = cereal$sugars
+
+plot(shelf, sugar)
+boxplot(sugar~shelf)
+
+#The box plot is giving more information. We are looking at how the sugar content is distributed, so looking at discrete values is not helpful. The box plot shows the distribution of sugar better as well as the mean value and variance. 
+```
+```{r 4.4.d.9}
+#The problem with serving size is it is different between cereals, a better way to look at it 'nutritional density' or nutritional values by weight.
+
+```
+```{r 4.4.d.10}
+shelf = cereal$shelf
+sugar_by_wieght = (cereal$sugars/cereal$weight)
+shelf
+boxplot(sugar_by_wieght~shelf)
+
+#The sugar cereals are where I would expect then, on the 2nd shelf where children can clearly see them (kids cereals are sugary and they are where kids can see them).
+
+```

@@ -1,0 +1,180 @@
+---
+title: "Project"
+author: "Le Nguyen"
+date: "7/11/2020"
+output: html_document
+---
+
+```{r Read_data}
+library(corrplot)
+library(tidyverse)
+library(infer)
+library(MASS)
+library(broom)
+load("~/Documents/STT 180/Project/NutritionStudy.rda")
+data = NutritionStudy
+data = data[c(-1,-3,-16)]
+
+data <- data %>%
+      mutate(Gender = ifelse(Gender == "Female",0,1))
+
+head(data, n = 10)
+#smoker: 1 is never, 2 is previous, 3 is current
+#vitamin use: 1 is regualr, 2 is occassioanlly, 3 is never
+```
+
+
+```{r}
+source("http://www.sthda.com/upload/rquery_cormat.r")
+rquery.cormat(data,)
+rquery.cormat(data,  graphType="")
+
+#we can see from the correlation matrix, that diet is the main factor contributing to the plasma types. 
+
+```
+```{r}
+ggplot(data, aes(x=Age, y=BetaPlasma)) +
+    geom_point(shape=1) +    
+    geom_smooth(method=lm) + ggtitle("Beta Plasma") + theme_grey(base_size = 18)
+age_beta.fit <- lm(Age ~ BetaPlasma, data = data)
+age_beta.fit %>%
+  broom::tidy()
+age_beta.fit %>%
+  glance(r.squared) 
+
+ggplot(data, aes(x=Age, y=RetinolPlasma)) +
+    geom_point(shape=1) +    
+    geom_smooth(method=lm) + ggtitle("Retinol Plasma") + theme_grey(base_size = 18)
+age_retinol.fit <- lm(Age ~ RetinolPlasma, data = data)
+age_retinol.fit %>%
+  broom::tidy()
+age_retinol.fit %>%
+  glance(r.squared) 
+
+
+```
+```{r}
+#female 0, male 1
+print("female")
+length(data$Gender[data$Gender == 0])
+print("male")
+length(data$Gender[data$Gender == 1])
+```
+```{r}
+boot_Retinol_male <- data[data$Gender == 1,] %>%
+  specify(response = RetinolPlasma) %>%
+  generate(reps = 7  , type = "bootstrap")
+
+ones = seq(from = 1, to =1, l = length(boot_Retinol_male$RetinolPlasma))
+boot_Retinol_male = cbind(boot_Retinol_male, ones)
+boot_Retinol_male = boot_Retinol_male[-1]
+names(boot_Retinol_male)[2] = "Gender"
+
+boot_Beta_male <- data[data$Gender == 1,] %>%
+  specify(response = BetaPlasma) %>%
+  generate(reps = 7  , type = "bootstrap")
+
+ones = seq(from = 1, to =1, l = length(boot_Beta_male$BetaPlasma))
+boot_Beta_male = cbind(boot_Beta_male, ones)
+boot_Beta_male = boot_Beta_male[-1]
+names(boot_Beta_male)[2] = "Gender"
+
+
+```
+
+```{r}
+print("bf")
+summary(data$BetaPlasma[data$Gender == 0])
+print("bm")
+summary(boot_Beta_male$BetaPlasma)
+
+print("rf")
+summary(data$RetinolPlasma[data$Gender == 0])
+print("rm")
+summary(boot_Retinol_male$RetinolPlasma)
+
+hist(data$BetaPlasma[data$Gender == 0], breaks=seq(0,2000,l=15), xlab = "Beta Plasma", main = "Female Beta Plasma")
+abline(v = mean(data$BetaPlasma[data$Gender == 0]),
+ col = "royalblue",
+ lwd = 2)
+abline(v = median(data$BetaPlasma[data$Gender == 0]),
+ col = "red",
+ lwd = 2)
+legend(x = "topright", 
+ c( "Mean", "Median"),
+ col = c( "royalblue", "red"),
+ lwd = c(2, 2))
+
+hist(boot_Beta_male$BetaPlasma, breaks=seq(0,2000,l=15), xlab = "Beta Plasma", main = "Male Beta Plasma")
+abline(v = mean(boot_Beta_male$BetaPlasma),
+ col = "royalblue",
+ lwd = 2)
+abline(v = median(boot_Beta_male$BetaPlasma),
+ col = "red",
+ lwd = 2)
+legend(x = "topright", 
+ c( "Mean", "Median"),
+ col = c( "royalblue", "red"),
+ lwd = c(2, 2))
+
+hist(data$RetinolPlasma[data$Gender == 0], breaks=seq(0,2000,l=15), xlab = "Retinol Plasma", main = "Female Retinol Plasma")
+abline(v = mean(data$RetinolPlasma[data$Gender == 0]),
+ col = "royalblue",
+ lwd = 2)
+abline(v = median(data$RetinolPlasma[data$Gender == 0]),
+ col = "red",
+ lwd = 2)
+legend(x = "topright", 
+ c( "Mean", "Median"),
+ col = c( "royalblue", "red"),
+ lwd = c(2, 2))
+
+hist(boot_Retinol_male$RetinolPlasma, breaks=seq(0,2000,l=15), xlab = "Retinol Plasma", main = "Male Retinol Plasma")
+abline(v = mean(boot_Retinol_male$RetinolPlasma),
+ col = "royalblue",
+ lwd = 2)
+abline(v = median(boot_Retinol_male$RetinolPlasma),
+ col = "red",
+ lwd = 2)
+legend(x = "topright", 
+ c( "Mean", "Median"),
+ col = c( "royalblue", "red"),
+ lwd = c(2, 2))
+   
+```
+```{r}
+fem.data = subset(data, Gender == 0 )
+fem.data = fem.data[c("Gender","BetaPlasma","RetinolPlasma")]
+new.data = fem.data %>% 
+  add_row(Gender = boot_Beta_male$Gender, BetaPlasma = boot_Beta_male$BetaPlasma, RetinolPlasma = boot_Retinol_male$RetinolPlasma)
+
+#mod.fit <- lm(Gender~BetaPlasma, data = new.data)
+#mod.fit %>%
+#  broom::tidy()
+#mod.fit %>%
+ # glance(r.squared) 
+
+
+#mod.fit <- lm(Gender~RetinolPlasma, data = new.data)
+#mod.fit %>%
+#  broom::tidy()
+#mod.fit %>%
+#  glance(r.squared) 
+
+new.data <- new.data %>%
+      mutate(Gender = ifelse(Gender == 0,"Female","Male"))
+ggplot(new.data, aes(x = Gender, y = BetaPlasma )) + geom_point() + geom_jitter() 
+ggplot(new.data, aes(x = Gender, y = RetinolPlasma )) + geom_point() + geom_jitter() 
+
+print("Beta Plasma")
+summary(new.data$BetaPlasma[new.data$Gender == "Female"])
+summary(new.data$BetaPlasma[new.data$Gender == "Male"])
+
+print("Retinol Plasma")
+summary(new.data$RetinolPlasma[new.data$Gender == "Female"])
+summary(new.data$RetinolPlasma[new.data$Gender == "Male"])
+
+```
+
+
+

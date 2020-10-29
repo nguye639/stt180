@@ -1,0 +1,225 @@
+---
+title: "Using joins to create MLB tables"
+author: ""
+date: "Module 7 A1 Week 7"
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: false
+    df_print: paged
+---
+
+<style type="text/css">
+/* Title */
+h1.title {
+  color: #000088;
+  font-size:60px;
+  font-weight: bold;
+}
+/* Level 1 header */
+h1 {
+  color: #000088;
+  font-weight: bold;
+}
+/* Level 2 header */
+h2 {
+  color: #CC0000;
+  font-weight: bold;
+}
+/* Level 4 header */
+h4 {
+  color: #000000;
+  font-weight: bold;
+}
+/* Table of contents */
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+    z-index: 2;
+    color: #fff;
+    background-color: #CC0000;
+    border-color: #337ab7;
+}
+
+</style> 
+
+```{r setup, include=FALSE}
+# global chunk options
+knitr::opts_chunk$set(echo = TRUE,
+                      error = TRUE,
+                      message = FALSE, 
+                      warning = FALSE,
+                      comment = NA,
+                      fig.width=9, 
+                      fig.height=7)
+```
+
+# Introduction
+
+Today you will get practice merging data frames with inner and outer join
+functions available in package `dplyr`. To get started, load packages
+`tidyverse` and `Lahman`.
+
+Package `Lahman` has numerous data frames about Major League Baseball.
+Type `help(package = "Lahman")` in your Console to see everything available.
+
+```{r packages}
+library(tidyverse)
+library(Lahman)
+```
+
+```{r hidden-packages, include=FALSE}
+# library(extrafont)
+# loadfonts(device = "win")
+```
+
+```{r theme-custom, include=FALSE}
+theme_custom <- function() {
+   theme_bw() +
+   theme(#text = element_text(family = "Comic Sans MS", color = "#000088"),
+         axis.title = element_text(size = 16), 
+         title = element_text(size = 20),
+         legend.title = element_text(size = 10),
+         legend.text = element_text(size = 10),
+         axis.text.x = element_text(size = 12),
+         axis.text.y = element_text(size = 12),
+         plot.caption = element_text(size = 10))
+ }
+```
+
+# Data
+
+You will work with data frames in package `Lahman`. When needed, utilize R's
+help to get an understanding of what the variables are in a given data frame.
+For example, `?Salaries` will provide a short description for each of the 
+variables in data frame `Salaries`.
+
+# Questions
+
+## Question 1 
+
+Select three data frames from package `Lahman`. Identify what variables are
+in common between any pair of the three data frames, and identify what
+variables are in common between all three data frames. What are the primary
+keys for each data frame?
+
+```{r}
+LahmanData
+names(AllstarFull)
+names(AwardsPlayers)
+names(Batting)
+
+#Between AllstarFull and AwardsPlayers: playerID, yearID
+#Between All: PlayerID, yearID
+#Primary Key is PlayerID
+
+```
+Between AllstarFull and AwardsPlayers: playerID, yearID
+Between All: PlayerID, yearID
+Primary Key is PlayerID for all
+
+
+
+## Question 2 
+
+Use data frames `Managers` and `AwardsManagers` to reproduce the 
+data frame given below.
+
+
+```{r}
+temp = Managers %>%
+  filter(yearID == "2016") %>%
+  right_join(AwardsManagers, by = "yearID")
+temp
+```
+
+
+## Question 3
+
+Use data frames `Managers`, `AwardsManagers`, and `Master` to reproduce the 
+data frame given below.
+
+
+```{r}
+temp2 = Managers %>%
+  left_join(AwardsManagers) %>%
+  left_join(Master, by = "playerID") %>%
+  filter(yearID >= "2000") %>%
+  select('yearID','teamID','nameFirst','nameLast','awardID') 
+
+temp2
+```
+
+
+## Question 4
+
+Use data frames `Teams` and `Salaries` to reproduce the plot below. Bar colors
+represent each team's primary color.
+
+```{r}
+winners = Teams %>%
+  filter(LgWin == 'Y') %>%
+  filter(yearID >= '2000') %>%
+  filter(yearID <= '2016') %>%
+  select(teamID,yearID)
+   
+win = semi_join(Salaries,winners)
+
+ggplot(win, aes(x = teamID, y = salary/10e6)) + geom_bar(stat = 'identity') + coord_flip() + scale_x_discrete() + labs(y ="Salary (millions)") 
+
+```
+
+
+## Question 5
+
+Adjust your plot in Question 4 for inflation with year 2000 as baseline.
+Comment on the differences between the plots.
+
+```{r}
+year = seq(2000,2016,1)
+inflation = c(1.00,1.03,1.04,1.07,1.10,1.13,1.17,1.20,1.25,1.25,1.27,1.31,1.33,1.35,1.37,1.38,1.39)
+ 
+win2 = win
+
+for (i in 1:16)
+{
+  for (j in 1:length(win2$yearID)){
+  if (win2$yearID[j] == year[i]){
+    win2$Salary = win2$salary/inflation[i]
+  }
+  
+  }
+}
+
+ggplot(win2, aes(x = teamID, y = Salary/10e6)) + geom_bar(stat = 'identity') + coord_flip() + scale_x_discrete() + labs(y ="Salary (millions)") 
+
+
+```
+I don't know if my approach was correct, especially with my data processesing, but from what I can see, even after inflation, the porpotion of sallaries are still the same. 
+
+
+Year | USD Value | Inflation Rate
+-----|-----------|----------------
+2000|	$1.00|	3.36%
+2001|	$1.03|	2.85%
+2002|	$1.04|	1.58%
+2003|	$1.07|	2.28%
+2004|	$1.10|	2.66%
+2005|	$1.13|	3.39%
+2006|	$1.17|	3.23%
+2007|	$1.20|	2.85%
+2008|	$1.25|	3.84%
+2009|	$1.25|	-0.36%
+2010|	$1.27|	1.64%
+2011|	$1.31|	3.16%
+2012|	$1.33|	2.07%
+2013|	$1.35|	1.46%
+2014|	$1.37|	1.62%
+2015|	$1.38|	0.12%
+2016|	$1.39|	1.26%
+
+# References {#References-link}
+
+1. Lahman, S. (2017) Lahman's Baseball Database, 1871-2016.
+
+2. RStudio Cheatsheets

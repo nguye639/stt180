@@ -1,0 +1,60 @@
+---
+title: "Week 2.3"
+author: "Le Nguyen"
+date: "7/8/2020"
+output: html_document
+---
+
+```{r 1}
+library(tidyverse)
+
+gapminder = read.csv(file = "gapminder-raw.csv")
+head(gapminder)
+
+#The columns are not labeled and there are many of them. From the last assignment, I can tell all the information is compresses to one row per country. So each row contains multiple variables in it.
+```
+```{r 2.1}
+long = gather(gapminder[2:length(gapminder)])
+gapminder1 = cbind(gapminder[1],long) 
+gapminder1
+
+
+```
+```{r 2.2}
+names(gapminder1)[1] = 'country'
+names(gapminder1)[2] = 'year'
+names(gapminder1)[3] = 'life.exp'
+gapminder1
+
+```
+```{r 2.3}
+gapminder1 = separate(gapminder1, 2, sep = 'X' , into = c('X','year'))
+
+gapminder1$year = as.integer(gapminder1$year)
+gapminder1 = within(gapminder1, rm(X))
+gapminder1
+
+```
+```{r 3.1}
+USA = subset(gapminder1, gapminder1$country == 'United States')
+
+ 
+ggplot(USA, aes(x = year, y = life.exp)) + geom_line(size = 1.5, color = "blue") + annotate("text", 1863, y = 28, label = "Civil War", color = "red") +
+annotate("text", 1930, y = 45, label = "WWI", color = "red")
+```
+```{r 3.2}
+library(ggplot2)
+library(reshape2)
+top5 = subset(gapminder1, country %in% c("China", "India", "Indonesia", "United States", "Brazil"))
+
+
+ggplot(top5,aes(x = year, y = life.exp)) + geom_line()
+
+```
+```{r 3.3}
+par(las = 2)
+boxplot(top5$life.exp~top5$country)
+
+
+```
+

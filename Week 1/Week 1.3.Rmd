@@ -1,0 +1,90 @@
+---
+title: "Week1.3"
+author: "Le Nguyen"
+date: "7/2/2020"
+output: html_document
+---
+
+```{r 1}
+load("baseball.Rdata")
+
+```
+```{r 2.1}
+ls()
+
+JimRiceBA
+```
+```{r 2.2 }
+min(JimRiceBA)
+max(JimRiceBA)
+mean(JimRiceBA)
+which.min(JimRiceBA)
+which.max(JimRiceBA)
+
+# compute differences
+JimRiceBA_diffs <- diff(JimRiceBA, lag = 1)
+JimRiceBA_diffs
+
+# find years
+which.max(JimRiceBA_diffs)
+
+which.min(JimRiceBA_diffs)
+
+
+```
+```{r 2.3}
+# find correlations between variables
+cor(JimRiceBA, JimRiceHR)
+cor(JimRiceBA, JimRiceRBI)
+cor(JimRiceHR, JimRiceRBI)
+
+#look at correlation visually
+plot(JimRiceHR, JimRiceRBI)
+
+```
+```{r 2.4.a}
+ls()
+length(TedWilliamsHR)
+print("19 seasons")
+```
+
+```{r 2.4.b}
+which.max(TedWilliamsBA)
+print("12th season")
+```
+```{r 2.4.c}
+plot(names(TedWilliamsBA), TedWilliamsBA, xlab = "year", ylab = "BA")
+```
+```{r 2.4.d}
+max(TedWilliamsBA)
+
+```
+
+```{r 2.4.e}
+mean(TedWilliamsBA)
+```
+
+```{r 2.4.f}
+cor(TedWilliamsHR,TedWilliamsRBI)
+cor(JimRiceHR,JimRiceRBI)
+print("Jim Rice's Corrolation between HR and RBI was higher")
+```
+```{r 2.4.g}
+
+JimRiceBA_diffs <- max(abs(diff(JimRiceBA, lag = 1)))
+JimRiceBA_diffs
+
+```
+```{r 2.4.h}
+print("1943-1945 was America's involvement in WWII, baseball was probably not being played then")
+
+```
+```{r 2.4.i}
+sd(CarltonFiskBA)
+sd(JimRiceBA)
+sd(TedWilliamsBA)
+
+print("Rice has the most consistent batting average. I defined the consistency with the standard deviation or the amount of disbution in a set of values (from the mean). Rice's BA had the lowest standard deviation, making it the least disbusrt.")
+
+```
+

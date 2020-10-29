@@ -1,0 +1,228 @@
+---
+title: "Baseball and R Markdown Introduction"
+author: ""
+date: "M1A3 Week 1"
+output: 
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, 
+                      message = FALSE, 
+                      warning = FALSE,
+                      comment = NA)
+```
+
+# Introduction
+
+The `Lahman` package in R contains a plethora of baseball data. The package 
+is used extensively in the book, *Analyzing Baseball Data with R*, by Max Marchi
+and Jim Albert (2013). This assignment will use a subset of data from the 
+`Lahman` package to expose you to some basic descriptive statistical functions
+and data subsetting within the R Markdown environment.
+
+A subset of the data is stored in a Rdata file. In order
+to read-in the data correctly, save the Rmd file in a folder with the rest
+of your course work. Place the file baseball.Rdata in the same folder. Go to
+Session > Set Working Directory > To Source File Location. Now you may run the
+below code that will load the data.
+
+```{r}
+load("baseball.Rdata")
+```
+
+# Lahman data
+
+## Accessing the data
+
+To see all the objects loaded from the baseball data set in this tutorial 
+use the function `ls()`. Function `ls()` lists all the objects in the current R
+environment.
+
+You may see other objects from previous instances of work in R.
+
+```{r}
+ls()
+```
+
+To access the content of an object in `R` use the object's name.
+Keep in mind that `R` is case sensitive. Thus, we need to type an object's name
+exactly as it appears.
+
+Above we see the object `JimRiceBA`. Run the code below to see the contents of
+`JimRiceBA`.
+
+```{r}
+JimRiceBA
+```
+
+*Baseball abbreviations*
+
+Abbreviation | Meaning
+---------- | ----------
+BA  | Batting Average
+HR  | Home Runs
+RBI | Runs Batted In
+
+*These are some measures of a batter's success.*
+
+## Descriptive statistics
+
+The names of many functions in `R` are self-explanatory. To compute the minimum,
+maximum, and mean for Jim Rice's career batting average we can use the
+corresponding functions given below.
+
+```{r}
+min(JimRiceBA)
+max(JimRiceBA)
+mean(JimRiceBA)
+```
+
+To find the year in which Jim Rice had his lowest batting average and
+the year in which he had his highest batting average,
+we can make use of the functions `which.min()` and `which.max()`, respectively.
+
+```{r}
+which.min(JimRiceBA)
+which.max(JimRiceBA)
+```
+
+Let's examine how Rice's batting average changed throughout his career. 
+First, we compute year-over-year differences, then view the results. 
+Second, we will look at which year he had the largest increase and which year 
+he had the largest decrease.
+
+```{r}
+# compute differences
+JimRiceBA_diffs <- diff(JimRiceBA, lag = 1)
+JimRiceBA_diffs
+
+# find years
+which.max(JimRiceBA_diffs)
+which.min(JimRiceBA_diffs)
+```
+
+The `#` symbol was used to add comments. `R` does not execute anything 
+following `#`. Use `#` for code documentation to explain to
+others why you are doing what you are doing with your code.
+Good code documentation is also beneficial for your future self.
+
+## Summary statistics with two variables
+
+Recall that the correlation measures the linear strength between two
+quantitative variables. Let's look at the correlation between each pair of
+available variables for Jim Rice: batting average, home runs, and RBIs.
+
+```{r}
+cor(JimRiceBA, JimRiceHR)
+cor(JimRiceBA, JimRiceRBI)
+cor(JimRiceHR, JimRiceRBI)
+```
+
+To view a simple plot of Rice's home runs versus his RBIs we can use the
+`plot()` function.
+
+```{r}
+plot(JimRiceHR, JimRiceRBI)
+```
+
+To learn more about Jim Rice 
+click [here](https://en.wikipedia.org/wiki/Jim_Rice).
+
+## Exercises
+
+```{r eval=FALSE, echo=FALSE, fig.cap="Ted Williams, 1939", out.width = '30%', fig.align='center'}
+knitr::include_graphics("tedwilliams.png")
+```
+
+Answer parts a-i below. Use a separate code chunk for each part that requires 
+code. You will examine data on
+[Ted Williams](https://en.wikipedia.org/wiki/Ted_Williams).
+
+*To remind yourself of the variable names use the function* `ls()`.
+
+a. Use the `length` function to determine how many seasons Ted Williams played.
+
+b. Which season did Ted Williams have his highest batting average?
+
+c. Plot Williams' batting average over time. To put the years on the x-axis,
+   use `names(TedWilliamsBA)`.
+
+d. What was Williams' highest batting average?
+
+e. What was Williams' career mean batting average?
+
+f. What was the correlation between Williams' home runs and RBIs? 
+   Was it higher than Jim Rice's correlation?
+
+g. What was the largest absolute change in Williams' RBIs year-over-year?
+
+h. Why does Ted Williams not have any statistics from 1943 - 1945? Was he hurt?
+
+i. Which of the three players (Fisk, Rice, Williams) was most consistent
+   year-over-year with regards to the batting average metric? How did
+   you define consistency?
+
+
+
+
+# R Markdown
+
+```{r eval=FALSE, echo=FALSE, fig.cap="", out.width = '30%', fig.align='center'}
+knitr::include_graphics("rmarkdown.png")
+```
+
+## Exercises
+
+Create the R Markdown file that produced the HTML file 
+[ica-01-10-19](http://rpubs.com/shawnsanto/ica-01-10-19). All formatting
+should match, but you may replace my name with your own name. Below are some
+helpful hints.
+
+1. YAML header should be
+
+```{r eval=FALSE}
+---
+title: "Console only"
+author: " "
+date: " "
+output: 
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+    df_print: paged
+---
+```
+
+2. In section 3.1 the `longley` data frame is shown, but the code is not.
+   You will need to use an appropriate chunk option to get your HTML 
+   file to match.
+
+3. To create the final plot use the below code. You will need to install each
+   package before you can load them with the `library` function.
+
+```{r eval=FALSE}
+library(ggplot2)
+library(rvg)
+library(ggiraph)
+
+longley$tooltip <- paste("GNP: ", longley$GNP, sep = "")
+
+gg_point_1 <- ggplot(longley, 
+                     aes(x = Year, y = Employed, tooltip = tooltip)) + 
+              geom_point_interactive(size = 4, color = "darkblue") + 
+              theme_bw()
+
+ggiraph(ggobj = gg_point_1)
+```
+
+# References
+
+1. Lahman, S. (2017) Lahman's Baseball Database, 1871-2016, Main page, http://www.seanlahman.com/baseball-archive/statistics/
+
+2. https://en.wikipedia.org/wiki/Ted_Williams

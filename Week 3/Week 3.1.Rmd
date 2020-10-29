@@ -1,0 +1,111 @@
+---
+title: "Week 3.1"
+author: "Le Nguyen"
+date: "7/14/2020"
+output: html_document
+---
+
+```{r 1}
+library(tidyverse)
+
+glimpse(diamonds)
+```
+```{r 1.1 }
+# *price*
+# price in US dollars (\$326--\$18,823)
+# 
+# *carat*
+# weight of the diamond (0.2--5.01)
+# 
+# *cut*
+# quality of the cut (Fair, Good, Very Good, Premium, Ideal)
+# 
+# *color*
+# diamond colour, from D (best) to J (worst)
+# 
+# *clarity*
+# a measurement of how clear the diamond is (I1 (worst), SI2, SI1, VS2, VS1, VVS2, VVS1, IF (best))
+# 
+# *x*
+# length in mm (0--10.74)
+# 
+# *y*
+# width in mm (0--58.9)
+# 
+# *z*
+# depth in mm (0--31.8)
+# 
+# *depth*
+# total depth percentage = z / mean(x, y) = 2 * z / (x + y) (43--79)
+# 
+# *table*
+# width of top of diamond relative to widest point (43--95)
+```
+```{r 2}
+# The factors that effect the price of a diamond are the weight (in karats), color, clarity, cut, and most importantly the aesthetic, which is hard to quantify. 
+```
+```{r 3}
+# I think the cut of the diamond is the most important factor in price. The cut is the most complicated factor in the diamond's appearance and the factor we have the most control over. I think color is the least important factor, because any color of diamond can be aesthetic depending on the other factors. 
+
+levels(diamonds$cut)
+levels(diamonds$clarity)
+levels(diamonds$color)
+
+table(diamonds$cut)
+table(diamonds$clarity)
+table(diamonds$color)
+
+summary(diamonds$price)
+
+price.per.carat = diamonds$price/diamonds$carat
+cbind(diamonds, price.per.carat)
+
+range(price.per.carat)
+sd(price.per.carat)
+
+#The price per carat is not constant. The price ranges from 1051.163-17828.846, with a standard deviation of 2012.66.
+
+#I think the price per carat varies because the raw weight of the diamond is not what determines the price as much as the other more aesthetic factors like cut, color, and clarity. So a smaller diamond with a better cut and clarity would fetch a higher price than a bigger one with worse of those factors.
+
+summary(diamonds$price[diamonds$cut == "Fair"])
+summary(diamonds$price[diamonds$cut == "Ideal"])
+summary(diamonds$price[diamonds$color == "D"])
+summary(diamonds$price[diamonds$color == "J"])
+
+#The diamond color doesn't matter that much since any color of diamond can look aesthetic depending on the other factors. For instance, a poorly colored diamond that is clear and cut well will sparkle nicely and the color itself doesn't matter.
+```
+
+
+```{r 3.1}
+# I would guess that there's a numbers bias towards poorly cut diamonds because they are more common than perfectly cut ones. Since they are more common they are sold more commonly, the demand drives the price up. 
+
+```
+```{r 4.5}
+ggplot(diamonds, aes(x=carat, y=price)) + geom_point()
+ggplot(diamonds, aes(x=carat, y=price, color = color)) + geom_point()
+ggplot(diamonds, aes(x=carat, y=price, color = color)) + geom_point(aes(shape = cut))
+cuts = ggplot(diamonds, aes(x=carat, y=price, color = color)) + geom_point()
+cuts + facet_wrap(~cut, ncol =3)
+
+colors = ggplot(diamonds, aes(x=carat, y=price, color = cut)) + geom_point()
+colors + facet_wrap(~clarity, ncol =3)
+```
+```{r 4.6}
+#My guess is that the carat scale is commonly applied in .5 increments as a rough measurement.This makes the diamonds appear to be in bins of every .5 carats. 
+
+```
+```{r 4.7}
+#It looks like the less ideal the color, the higher the carat most of the time. So poorly colored diamonds tend to bigger, which makes them more expensive. 
+
+```
+```{r 4.8}
+#I find plot 3 to be too busy to interpret, there's to much information trying to be shown in one plot. Plot 4 is easier to read because the data is split between plots which makes it easier to read. 
+
+```
+```{r 4.9}
+#The foggiest diamonds are probably already considered low quality and not worth the effort to make a quality cut. The clearest diamonds are worth making ideal cuts on since they will sparkle the most, and their value is going to be based highly on the cut.
+
+```
+
+
+

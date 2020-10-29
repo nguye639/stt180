@@ -1,0 +1,264 @@
+---
+title: "Course evaluations and simple linear regression"
+author: "Le Nguyen"
+date: ""
+output: 
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    number_sections: false
+    df_print: paged
+---
+
+<style type="text/css">
+/* Title */
+h1.title {
+  color: #08738a;
+  font-size:40px;
+  font-weight: bold;
+}
+/* Level 1 header */
+h1 {
+  color: #0ba2c2;
+}
+/* Level 2 header */
+h2 {
+  color: #0ba2c2;
+}
+/* Level 4 header */
+h4 {
+  font-weight: bold;
+}
+/* Table of contents */
+.list-group-item.active, .list-group-item.active:focus, .list-group-item.active:hover {
+    z-index: 2;
+    color: #fff;
+    background-color: #82D0C7;
+    border-color: #337ab7;
+}
+    
+</style>
+
+```{r setup, include=FALSE}
+# global chunk options
+knitr::opts_chunk$set(echo = TRUE,
+                      error = TRUE,
+                      message = FALSE, 
+                      warning = FALSE,
+                      comment = NA,
+                      fig.width=6, 
+                      fig.height=5)
+```
+
+# Introduction
+
+This is adapted from Lab 6 in Duke's Introduction to Data Science course.
+
+We will analyze what goes into course evaluations and how certain variables
+effect the overall score.
+
+To get started, load packages `tidyverse` and `broom`. Install
+any packages with code `install.packages("package_name")`.
+
+```{r packages, echo=TRUE}
+library(tidyverse)
+library(broom)
+```
+
+
+```{r theme-custom, include=FALSE}
+theme_custom <- function() {
+  theme_bw() +
+  theme(text = element_text(color = "#4C6A92"),
+        axis.title = element_text(size = 16), 
+        title = element_text(size = 20),
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 10),
+        axis.text.x = element_text(size = 12),
+        axis.text.y = element_text(size = 12),
+        plot.caption = element_text(size = 10))
+}
+```
+
+# Data
+
+The data were gathered from end of semester student evaluations for a 
+large sample of professors from the University of Texas at Austin. 
+In addition, six students rated the professors' physical appearance. 
+Each row in `evals` contains a different course and the 
+columns represent variables about the courses and professors.
+
+Use `read_csv()` to read in the data and save it as an object named `evals`.
+The data is available on D2L.
+
+
+```{r data, echo=TRUE}
+evals <- read_csv("evals-mod.csv")
+glimpse(evals)
+attach(evals)
+levels(as.factor(cls_profs))
+```
+
+## Data dictionary
+
+**Variable** | **Description**
+-------------|---------------------------------------------------------
+score |	Average professor evaluation score: (1) very unsatisfactory - (5) excellent
+rank |	Rank of professor: teaching, tenure track, tenure
+ethnicity |	Ethnicity of professor: not minority, minority
+gender |	Gender of professor: female, male
+language |	Language of school where professor received education: english or non-english
+age |	Age of professor
+cls_perc_eval |	Percent of students in class who completed evaluation
+cls_did_eval |	Number of students in class who completed evaluation
+cls_students |	Total number of students in class
+cls_level |	Class level: lower, upper
+cls_profs |	Number of professors teaching sections in course in sample: single, multiple
+cls_credits	| Number of credits of class: one credit (lab, PE, etc.), multi credit
+bty_f1lower |	Beauty rating of professor from lower level female: (1) lowest - (10) highest
+bty_f1upper |	Beauty rating of professor from upper level female: (1) lowest - (10) highest
+bty_f2upper |	Beauty rating of professor from upper level female: (1) lowest - (10) highest
+bty_m1lower |	Beauty rating of professor from lower level male: (1) lowest - (10) highest
+bty_m1upper |	Beauty rating of professor from upper level male: (1) lowest - (10) highest
+bty_m2upper |	Beauty rating of professor from upper level male: (1) lowest - (10) highest
+
+# Exploratory data analysis
+
+#### Task 1
+
+Create a scatter plot between `score` and a quantitative variable. Comment
+on the relationship. What do you think the correlation is between the variables?
+```{r}
+library(ggplot2)
+
+ggplot(evals, aes(score, age)) + geom_point()
+
+#No correlation, the values look pretty evenly distributed. 
+```
+
+
+
+#### Task 2
+
+Create a scatter plot between `score` and a categorical variable. Comment
+on the relationship. Add `geom_jitter()` to your plot.
+What do you notice about the variability in score
+between different levels?
+
+```{r}
+ggplot(evals, aes(score, gender)) + geom_point() + geom_jitter()
+
+#The score seems equally variable across genders
+```
+
+
+#### Task 3
+
+Create a variable named `avg_bty`. This is the average attractiveness from the
+six student scores for each professor. Add this variable to `evals`.
+*Hint*: `rowwise()` then `mutate()` then `ungroup()`
+
+```{r}
+evals = evals %>%
+  rowwise() %>%
+  mutate(avg_bty = mean(c_across(bty_f1lower:bty_m2upper)))
+
+```
+
+
+#### Task 4
+
+Create a scatter plot between `score` and `avg_bty`. Comment
+on the relationship. What do you think the correlation is between the variables?
+```{r}
+ggplot(evals, aes(score, avg_bty)) + geom_point() 
+
+#Slight positive correlation between the two variables.
+```
+
+#### Task 5
+
+Modify your plot from Task 4. Add a layer with `geom_jitter()`. Comment
+on the relationship.
+```{r}
+ggplot(evals, aes(score, avg_bty)) + geom_point() + geom_jitter()
+
+#The positive corrolation between the variables is more apparent now.
+```
+# Model build
+
+#### Task 6
+
+Fit a linear model with function `lm()` between variables `score` and
+`avg_bty`. Save it as an object `m.bty`.
+What are the estimates for $b_0$ and $b_1$? *Hint*: `tidy()`
+```{r}
+
+m.bty <- lm(score ~ avg_bty, data = evals)
+m.bty %>%
+  broom::tidy()
+#b0 = 3.88, b1 = .066
+```
+
+
+#### Task 7
+
+Modify your plot from Task 4 and include the regression line. Pick a different
+color than the default of blue.
+```{r}
+evals %>% 
+  ggplot( aes(x = score, y = avg_bty)) + geom_point() + geom_smooth(method=lm, se= FALSE, color = "red")
+```
+
+
+#### Task 8
+
+Interpret the slope of the fitted model. Does the intercept have any practical
+meaning within the scope of our data?
+```{r}
+#The slope of the fit shows the correlation between the variables. In this case there is a small positive correlation between the variables. The intercept shows what average beauty a professor with score zero would have. In this case I think the quantity is meaningless because there isn't a direct corrolation between beauty and score. 
+```
+
+
+#### Task 9
+
+What is the $R^2$ value? Interpret this value. *Hint*: `glance()`
+```{r}
+m.bty %>%
+  glance(r.squared) 
+
+#the r^2 value is .035 which means the fit is terrible, there's a high variability in the regression
+```
+
+# Residuals
+
+#### Task 10
+
+Create a plot of the residual value versus `avg_bty`. Comment on what you
+observe.
+
+```{r}
+m.bty %>%
+  augment() %>%
+  ggplot(mapping = aes(x =avg_bty,y = .resid)) +geom_point()
+
+#the residuals are fairly uniform, but have a slight trend to them. This means that the type of fit used was correct. 
+```
+
+#### Task 11
+
+Compute the sum of squared residuals. Function `augment()` will give you all
+the residuals.
+```{r}
+res = resid(mod.fit)
+sum_res = sum(res**2)
+sum_res
+```
+
+
+
+# References {#References-link}
+
+1. http://www2.stat.duke.edu/courses/Spring18/Sta199/labs/lab-06-modelling-course-evals.html
+

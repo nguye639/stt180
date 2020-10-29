@@ -1,0 +1,158 @@
+---
+title: "Familarizing with R/RStudio"
+author: ""
+date: "M1A2 Week 1"
+output: 
+  html_document:
+    toc: true
+    number_sections: true
+    toc_float: true
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, comment = NA)
+```
+# Information
+
+## This database gives information on different demographics for countries in the world.
+
+```{r, echo=FALSE}
+u <- "http://www.finley-lab.com/files/data/WorldBank.csv"
+WorldBank <- read.csv(u, header = TRUE, stringsAsFactors = FALSE)
+head(WorldBank)
+```
+How many variables are there in the dataset?
+
+```{r, echo=FALSE}
+ncol(WorldBank)
+```
+What are the names of the different variables in the dataset?
+```{r, echo=FALSE}
+names(WorldBank)
+
+```
+```{r, include=FALSE}
+#what are the types of the different variables?
+str(WorldBank)
+```
+
+Identify the types of the different variables.
+
+What is the timeframe of the database?
+
+```{r, echo =FALSE}
+data.frame(min(WorldBank$year), max(WorldBank$year))
+
+```
+
+What is the dimension of the dataset?
+
+```{r, echo =FALSE}
+dim(WorldBank$year)
+
+```
+
+Extract the information for rows 15 of the database.
+
+
+Extract the information for rows 55:65 of the database.
+
+
+##Regions of the World
+
+The major demographic areas included in the database:
+
+```{r}
+unique(WorldBank$region)
+```
+
+Form a data frame using the latitude and longitude for one unique region. Here the latitube and longitude for *North America* is given below:
+
+```{r, echo=FALSE}
+latNA<-unique(WorldBank$latitude[WorldBank$region=="North America"])
+longtNA<-unique(WorldBank$longitude[WorldBank$region=="North America"])
+data.frame(latNA, longtNA)
+```
+
+**Select another region and give the latitude and longitude for that region. Please be sure to mention which region was selected.**
+
+
+# Analyse *Fertility* and *Life expectancy*
+
+##Visual analysis of fertility and Life-expectancy data for years 1960 and 1975.
+
+**Plots**
+
+**Year 1960**
+
+```{r, echo=FALSE}
+# fertility and LifeExpectancy for 1960
+fertility_60 <- WorldBank$fertility.rate[WorldBank$year == 1960]
+
+lifeexp_60 <- WorldBank$life.expectancy[WorldBank$year == 1960]
+data.frame(fertility_60[1:5],lifeexp_60[1:5])
+```
+
+
+In this section we will plot the data for fertility and life expectancy 
+
+```{r, echo=FALSE}
+# fertility and LifeExpectancy for 1960
+fertility_60 <- WorldBank$fertility.rate[WorldBank$year == 1960]
+
+lifeexp_60 <- WorldBank$life.expectancy[WorldBank$year == 1960]
+```
+
+The simple plot for fertility vs life expectancy for **1960**.
+
+```{r, echo=FALSE}
+#plot
+plot(lifeexp_60, fertility_60)
+```
+
+The enhanced plot of the **1960** data for fertility and life expectancy based on the population size.
+
+```{r, include==FALSE}
+#population and region for 1960
+pop_60 <- WorldBank$population[WorldBank$year == 1960]
+region_60 <- WorldBank$region[WorldBank$year == 1960]
+plot(lifeexp_60, fertility_60, type="n")
+symbols(lifeexp_60, fertility_60, circles =sqrt(pop_60/pi), inches=0.35,fg=1:8, bg=match(region_60, unique(region_60)))
+legend("bottomleft", inset=0.005,
+       unique(region_60), fill=1:8, cex=0.8)
+```
+
+**Year 1975**
+
+```{r, echo=FALSE}
+fertility_75 <- WorldBank$fertility.rate[WorldBank$year == 1975]
+lifeexp_75 <- WorldBank$life.expectancy[WorldBank$year == 1975]
+data.frame(fertility_75[1:10],lifeexp_75[1:10])
+```
+
+The simple plot for fertility vs life expectancy for **1975**.
+
+```{r, echo=FALSE}
+plot(lifeexp_75, fertility_75)
+```
+
+The enhanced plot of the **1975** data for fertility and life expectancy based on the population size.
+
+```{r, echo=FALSE}
+pop_75 <- WorldBank$population[WorldBank$year == 1975]
+region_75 <- WorldBank$region[WorldBank$year == 1975]
+plot(lifeexp_75, fertility_75, type="n")
+symbols(lifeexp_75, fertility_75, circles = sqrt(pop_75/pi), inches=0.35,fg = 1:8,bg=match(region_75, unique(region_75)))
+legend("bottomleft", inset=0.005,
+       unique(region_75), fill=1:8, cex=0.8)
+```
+
+# Comparison of fertility and life-expectancy data for the two years
+
+Comment on the trend, shift and visible change in densities based on population (3-4 lines).
+
+##For years 1965 vs 1970
+
+##For years 1970 vs 2008
+
